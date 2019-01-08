@@ -3,8 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "classnames": "^2.2.6",
+    "debounce": "^1.2.0",
+    "prop-types": "^15.6.2",
+    "ramda": "^0.26.1",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
+    "react-event-listener": "^0.6.4",
     "react-scripts": "2.1.1"
   },
   "scripts": {

@@ -1,0 +1,38 @@
+body {
+  margin: 0;
+}
+
+.slide-group-container {
+  border: 1px solid brown;
+  width: 70%;
+}
+
+.app {
+  min-width: calc(100vw - 32px);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.siema-container {
+  padding-top: 20px;
+}
+
+.slide-group {
+  background-color: rgba(200, 100, 200, 0.6);
+  overflow: hidden;
+  width: 100%;
+}
+
+.product-summary {
+  background-color: #dedede;
+  flex-direction: column;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  width: 181px;
+}
