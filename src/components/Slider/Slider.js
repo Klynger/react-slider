@@ -41,8 +41,7 @@ export default class Slider extends Component {
     super(props)
 
     this.state = {
-      pointerDown: false,
-      currentSlide: props.startIndex
+      pointerDown: false
     }
 
     this.drag = {
@@ -51,6 +50,8 @@ export default class Slider extends Component {
       startY: 0,
       letItGo: null
     }
+
+    this.currentSlide = props.startIndex
   }
 
   componentDidMount() {
@@ -58,7 +59,7 @@ export default class Slider extends Component {
 
     this.onResize = debounce(() => {
       this.resize()
-      this.slideToCurrent()
+      this.slideToCurrent(this.currentSlide)
     }, this.props.resizeDebounce)
 
     window.addEventListener('resize', this.onResize)
@@ -115,38 +116,11 @@ export default class Slider extends Component {
   }
 
   prev = (howManySlides = 1) => {
-    let newCurrentSlide
-    this.setState(({ currentSlide }) => {
-      const newCurrentSlide = Math.max(currentSlide - howManySlides, 0)
-
-      this.slideToCurrent(newCurrentSlide)
-      return {
-        currentSlide: newCurrentSlide
-      }
-    })
-    this.props.onChange.call(this)
-
-    return newCurrentSlide
+    this.currentSlide = Math.max(this.currentSlide - howManySlides, 0)
   }
 
   next = (howManySlides = 1) => {
-    let newCurrentSlide
-    if (this.innerElements.length <= this.perPage) {
-      return
-    }
-    this.setState(({ currentSlide }) => {
-      newCurrentSlide = Math.min(currentSlide + howManySlides, this.innerElements.length - this.perPage)
-
-      if (newCurrentSlide !== currentSlide) {
-        this.slideToCurrent(newCurrentSlide)
-        this.props.onChange.call(this)
-      }
-
-      return {
-        currentSlide: newCurrentSlide
-      }
-    })
-    return newCurrentSlide
+    this.currentSlide = Math.min(this.currentSlide + howManySlides, this.innerElements.length - this.perPage)
   }
 
   slideToCurrent = (currentSlide) => {
@@ -157,13 +131,12 @@ export default class Slider extends Component {
   updateAfterDrag = () => {
     const { threshold } = this.props
     const movement = this.drag.endX - this.drag.startX
-    let newCurrentSlide
     if (movement > 0 && Math.abs(movement) > threshold) {
-      newCurrentSlide = this.prev()
+      this.prev()
     } else if (movement < 0 && Math.abs(movement) > threshold) {
-      newCurrentSlide = this.next()
+      this.next()
     }
-    this.slideToCurrent(newCurrentSlide)
+    this.slideToCurrent(this.currentSlide)
   }
 
   resize = () => {
@@ -172,6 +145,12 @@ export default class Slider extends Component {
     this.selectorWidth = this.selector.getBoundingClientRect().width
     this.setStyle(this.sliderFrame, {
       width: (this.selectorWidth / this.perPage) * this.innerElements.length
+    })
+
+    this.innerElements.forEach(el => {
+      this.setStyle(el, {
+        width: `${100 / this.innerElements.length}%`
+      })
     })
   }
 
@@ -217,14 +196,13 @@ export default class Slider extends Component {
 
   onMouseMove = e => {
     const { easing } = this.props
-    const { currentSlide } = this.state
 
     e.preventDefault()
     if (this.state.pointerDown) {
       this.drag.endX = e.pageX
 
       const dragOffset = (this.drag.endX - this.drag.startX)
-      const currentOffset = currentSlide * (this.selectorWidth / this.perPage)
+      const currentOffset = this.currentSlide * (this.selectorWidth / this.perPage)
       const offset = currentOffset - dragOffset
 
       this.setStyle(this.sliderFrame, {
@@ -249,6 +227,7 @@ export default class Slider extends Component {
         transition: `all ${duration}ms ${easing}`
       })
       this.updateAfterDrag()
+      console.log('drag', this.drag)
       this.clearDrag()
     }
   }

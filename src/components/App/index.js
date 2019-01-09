@@ -11,7 +11,7 @@ class App extends Component {
       <div className="app">
         <div className="slide-group-container">
           <Slider>
-            {[1, 2, 3, 4, 5, 6].map(i => (
+            {[1, 2, 3, 4, 5].map(i => (
               <Slide key={i}>
                 <ProductSummary index={i} />
               </Slide>
