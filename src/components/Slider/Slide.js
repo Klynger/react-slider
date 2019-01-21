@@ -7,10 +7,10 @@ export default class Slide extends Component {
   }
 
   render() {
-    const { children, style } = this.props
+    const { children } = this.props
     
     return (
-      <div className="slide" style={style}>
+      <div className="slide">
         {children}
       </div>
     )

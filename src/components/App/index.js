@@ -10,7 +10,7 @@ class App extends Component {
     return (
       <div className="app">
         <div className="slide-group-container">
-          <Slider>
+          <Slider loop>
             {[1, 2, 3, 4, 5].map(i => (
               <Slide key={i}>
                 <ProductSummary index={i} />

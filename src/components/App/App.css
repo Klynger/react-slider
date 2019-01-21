@@ -27,6 +27,13 @@ body {
   width: 100%;
 }
 
+.slide {
+  float: left;
+  /* background-color: #777; */
+  display: flex;
+  justify-content: center;
+}
+
 .product-summary {
   background-color: #dedede;
   flex-direction: column;
