@@ -3,16 +3,10 @@ import React, { Children, Component, cloneElement } from 'react'
 import PropTypes from 'prop-types'
 import transformProperty from '../../utils/transformProperty'
 
-/**
- * I got copy this.innerElements[this.innerElements.length - this.perPage : this.innerElements.length] and
- * this.innerElements[0 : this.perPage], then I append the last elements that I copy, then original elements, then
- * the first elements that I copy ex: if I have 1 2 3 4 5 and show 2 elements per page I will have 4 5 1 2 3 4 5 1 2.
- * To make it work I gonna have to show children first, after things start I gonna have to change it and show all the 
- * elements with copies
- */
 export default class Slider extends Component {
   static propTypes = {
     resizeDebounce: PropTypes.number,
+    onChangeCurrentSlide: PropTypes.func.isRequired,
     duration: PropTypes.number,
     easing: PropTypes.string,
     perPage: PropTypes.number,
@@ -30,9 +24,9 @@ export default class Slider extends Component {
 
   static defaultProps = {
     resizeDebounce: 250,
-    duration: 200,
+    duration: 250,
     easing: 'ease-out',
-    perPage: 2,
+    perPage: 1,
     startIndex: 0,
     draggable: true,
     threshold: 20,
@@ -108,9 +102,7 @@ export default class Slider extends Component {
         width: `${100 / this.innerElements.length}%`
       })
     })
-
     this.slideToCurrent()
-    this.props.onInit.call(this)
   }
 
   // componentWillUnmount() {
@@ -140,12 +132,20 @@ export default class Slider extends Component {
     }
   }
 
+  get totalSlides() {
+    return this.innerElements && this.perPage ?  this.innerElements.length - 2 * this.perPage : 0
+  }
+
   prev = (howManySlides = 1) => {
-    if (this.innerElements.length <= this.perPage) {
+    if (this.totalSlides <= this.perPage) {
       return
     }
 
-    const { loop, draggable } = this.props
+    const {
+      loop,
+      draggable,
+      onChangeCurrentSlide
+    } = this.props
     const beforeChange = this.currentSlide
 
     if (loop) {
@@ -159,7 +159,9 @@ export default class Slider extends Component {
         const offset = -1 * moveTo * (this.selectorWidth / this.perPage)
         const dragDistance = draggable ? this.drag.endX - this.drag.startX : 0
 
-        this.sliderFrame.style[transformProperty] = `translate3d(${offset + dragDistance}px, 0, 0)`
+        requestAnimationFrame(() => {
+          this.sliderFrame.style[transformProperty] = `translate3d(${offset + dragDistance}px, 0, 0)`
+        })
         this.currentSlide = mirrorSlideIndex - howManySlides
       } else {
         this.currentSlide -= howManySlides
@@ -167,19 +169,27 @@ export default class Slider extends Component {
     } else {
       this.currentSlide = Math.max(this.currentSlide - howManySlides, 0)
     }
-
-    if (beforeChange !== this.currentSlide) {
-      this.slideToCurrent(loop)
+    
+    if (this.currentSlide !== beforeChange) {
+      this.slideToCurrent()
+      requestAnimationFrame(() => {
+        onChangeCurrentSlide(this.currentSlide)
+      })
     }
   }
 
   next = (howManySlides = 1) => {
-    if (this.innerElements.length <= this.perPage) {
+    if (this.totalSlides <= this.perPage) {
       return
     }
 
+    const {
+      loop,
+      draggable,
+      onChangeCurrentSlide
+    } = this.props
+
     const beforeChange = this.currentSlide
-    const { loop, draggable } = this.props
 
     if (loop) {
       const isNewIndexClone = this.currentSlide + howManySlides > this.innerElements.length - (3 * this.perPage)
@@ -191,6 +201,7 @@ export default class Slider extends Component {
         const moveTo = mirrorSlideIndex + mirrorSlideIndexOffset
         const offset = -1 * moveTo * (this.selectorWidth / this.perPage)
         const dragDistance = draggable ? this.drag.endX - this.drag.startX : 0
+
         requestAnimationFrame(() => {
           this.sliderFrame.style[transformProperty] = `translate3d(${offset + dragDistance}px, 0, 0)`
         })
@@ -204,14 +215,31 @@ export default class Slider extends Component {
 
     if (beforeChange !== this.currentSlide) {
       this.slideToCurrent(loop)
+      requestAnimationFrame(() => {
+        onChangeCurrentSlide(this.currentSlide)
+      })
     }
   }
 
-  slideToCurrent = enableTransition => {
+  goTo = index => {
+    if (this.totalSlides <= this.perPage) {
+      return
+    }
+
+    const beforeChange = this.currentSlide
+    this.currentSlide = this.props.loop ? index % this.totalSlides : Math.min(Math.max(index, 0), this.totalSlides - this.perPage)
+
+    if (this.currentSlide !== beforeChange) {
+      this.slideToCurrent()
+      this.props.onChangeCurrentSlide(this.currentSlide)
+    }
+  }
+
+  slideToCurrent = (shouldEnableTransition) => {
     const currentSlide = this.props.loop ? this.currentSlide + this.perPage : this.currentSlide
     const offset = -1 * currentSlide * (this.selectorWidth / this.perPage)
 
-    if (enableTransition) {
+    if (shouldEnableTransition) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           this.enableTransition()
