@@ -10,7 +10,6 @@ export default class Slider extends Component {
     duration: PropTypes.number,
     easing: PropTypes.string,
     perPage: PropTypes.number,
-    startIndex: PropTypes.number,
     draggable: PropTypes.bool,
     threshold: PropTypes.number,
     loop: PropTypes.bool,
@@ -27,7 +26,7 @@ export default class Slider extends Component {
     duration: 250,
     easing: 'ease-out',
     perPage: 1,
-    startIndex: 0,
+    currentSlide: 0,
     draggable: true,
     threshold: 20,
     loop: false,
@@ -46,8 +45,6 @@ export default class Slider extends Component {
       startY: 0,
       letItGo: null
     }
-
-    this.currentSlide = props.startIndex
   }
 
   componentDidMount() {
@@ -88,7 +85,7 @@ export default class Slider extends Component {
   }
 
   init = () => {
-    const { draggable } = this.props
+    const { draggable, currentSlide } = this.props
     this.setSelectorWidth()
     this.setInnerElements()
     this.resolveSlidesNumber()
@@ -102,7 +99,7 @@ export default class Slider extends Component {
         width: `${100 / this.innerElements.length}%`
       })
     })
-    this.slideToCurrent()
+    this.slideToCurrent(false, currentSlide)
   }
 
   // componentWillUnmount() {
@@ -144,16 +141,17 @@ export default class Slider extends Component {
     const {
       loop,
       draggable,
-      onChangeCurrentSlide
+      onChangeCurrentSlide,
+      currentSlide
     } = this.props
-    const beforeChange = this.currentSlide
 
+    let newCurrentSlide = currentSlide
     if (loop) {
-      const isNewIndexClone = this.currentSlide - howManySlides < 0
+      const isNewIndexClone = currentSlide - howManySlides < 0
       if (isNewIndexClone) {
         this.disableTransition()
 
-        const mirrorSlideIndex = this.currentSlide + this.innerElements.length - (2 * this.perPage)
+        const mirrorSlideIndex = currentSlide + this.innerElements.length - (2 * this.perPage)
         const mirrorSlideIndexOffset = this.perPage
         const moveTo = mirrorSlideIndex + mirrorSlideIndexOffset
         const offset = -1 * moveTo * (this.selectorWidth / this.perPage)
@@ -162,18 +160,18 @@ export default class Slider extends Component {
         requestAnimationFrame(() => {
           this.sliderFrame.style[transformProperty] = `translate3d(${offset + dragDistance}px, 0, 0)`
         })
-        this.currentSlide = mirrorSlideIndex - howManySlides
+        newCurrentSlide = mirrorSlideIndex - howManySlides
       } else {
-        this.currentSlide -= howManySlides
+        newCurrentSlide -= howManySlides
       }
     } else {
-      this.currentSlide = Math.max(this.currentSlide - howManySlides, 0)
+      newCurrentSlide = Math.max(currentSlide - howManySlides, 0)
     }
     
-    if (this.currentSlide !== beforeChange) {
-      this.slideToCurrent()
+    if (newCurrentSlide !== currentSlide) {
+      this.slideToCurrent(loop, newCurrentSlide)
       requestAnimationFrame(() => {
-        onChangeCurrentSlide(this.currentSlide)
+        onChangeCurrentSlide(newCurrentSlide)
       })
     }
   }
@@ -186,17 +184,18 @@ export default class Slider extends Component {
     const {
       loop,
       draggable,
-      onChangeCurrentSlide
+      onChangeCurrentSlide,
+      currentSlide
     } = this.props
 
-    const beforeChange = this.currentSlide
+    let newCurrentSlide = currentSlide
 
     if (loop) {
-      const isNewIndexClone = this.currentSlide + howManySlides > this.innerElements.length - (3 * this.perPage)
+      const isNewIndexClone = currentSlide + howManySlides > this.innerElements.length - (3 * this.perPage)
       if (isNewIndexClone) {
         this.disableTransition()
 
-        const mirrorSlideIndex = this.currentSlide - this.innerElements.length + (2 * this.perPage)
+        const mirrorSlideIndex = currentSlide - this.innerElements.length + (2 * this.perPage)
         const mirrorSlideIndexOffset = this.perPage
         const moveTo = mirrorSlideIndex + mirrorSlideIndexOffset
         const offset = -1 * moveTo * (this.selectorWidth / this.perPage)
@@ -205,38 +204,39 @@ export default class Slider extends Component {
         requestAnimationFrame(() => {
           this.sliderFrame.style[transformProperty] = `translate3d(${offset + dragDistance}px, 0, 0)`
         })
-        this.currentSlide = mirrorSlideIndex + howManySlides
+        newCurrentSlide = mirrorSlideIndex + howManySlides
       } else {
-        this.currentSlide += howManySlides
+        newCurrentSlide += howManySlides
       }
     } else {
-      this.currentSlide = Math.min(this.currentSlide + howManySlides, this.innerElements.length - this.perPage)
+      newCurrentSlide = Math.min(currentSlide + howManySlides, this.innerElements.length - this.perPage)
     }
 
-    if (beforeChange !== this.currentSlide) {
-      this.slideToCurrent(loop)
+    if (newCurrentSlide !== currentSlide) {
+      this.slideToCurrent(loop, newCurrentSlide)
       requestAnimationFrame(() => {
-        onChangeCurrentSlide(this.currentSlide)
+        onChangeCurrentSlide(newCurrentSlide)
       })
     }
   }
 
   goTo = index => {
+    const { onChangeCurrentSlide, currentSlide, loop } = this.props
+
     if (this.totalSlides <= this.perPage) {
       return
     }
 
-    const beforeChange = this.currentSlide
-    this.currentSlide = this.props.loop ? index % this.totalSlides : Math.min(Math.max(index, 0), this.totalSlides - this.perPage)
+    let newCurrentSlide = loop ? index % this.totalSlides : Math.min(Math.max(index, 0), this.totalSlides - this.perPage)
 
-    if (this.currentSlide !== beforeChange) {
-      this.slideToCurrent()
-      this.props.onChangeCurrentSlide(this.currentSlide)
+    if (newCurrentSlide !== currentSlide) {
+      this.slideToCurrent(false, newCurrentSlide)
+      onChangeCurrentSlide(newCurrentSlide)
     }
   }
 
-  slideToCurrent = (shouldEnableTransition) => {
-    const currentSlide = this.props.loop ? this.currentSlide + this.perPage : this.currentSlide
+  slideToCurrent = (shouldEnableTransition, current) => {
+    const currentSlide = this.props.loop ? current + this.perPage : current
     const offset = -1 * currentSlide * (this.selectorWidth / this.perPage)
 
     if (shouldEnableTransition) {
@@ -252,13 +252,13 @@ export default class Slider extends Component {
   }
 
   updateAfterDrag = () => {
-    const { threshold } = this.props
+    const { threshold, currentSlide } = this.props
     const movement = this.drag.endX - this.drag.startX
     const movementDistance = Math.abs(movement)
     const howManySliderToSlide = Math.ceil(movementDistance / (this.selectorWidth / this.perPage))
     
-    const slideToNegativeClone = movement > 0 && this.currentSlide - howManySliderToSlide < 0
-    const slideToPositiveClone = movement < 0 && this.currentSlide + howManySliderToSlide > this.innerElements.length - this.perPage
+    const slideToNegativeClone = movement > 0 && currentSlide - howManySliderToSlide < 0
+    const slideToPositiveClone = movement < 0 && currentSlide + howManySliderToSlide > this.innerElements.length - this.perPage
 
     if (movement > 0 && movementDistance > threshold && this.innerElements.length > this.perPage) {
       this.prev(howManySliderToSlide)
@@ -321,7 +321,7 @@ export default class Slider extends Component {
   }
 
   onMouseMove = e => {
-    const { easing, loop } = this.props
+    const { easing, loop, currentSlide } = this.props
 
     e.preventDefault()
     if (this.pointerDown) {
@@ -329,8 +329,8 @@ export default class Slider extends Component {
 
       this.drag.endX = e.pageX
 
-      const currentSlide = loop ? this.currentSlide +  this.perPage : this.currentSlide
-      const currentOffset = currentSlide * (this.selectorWidth / this.perPage)
+      const computedCurrentSlide = loop ? currentSlide +  this.perPage : currentSlide
+      const currentOffset = computedCurrentSlide * (this.selectorWidth / this.perPage)
       const dragOffset = (this.drag.endX - this.drag.startX)
       const offset = currentOffset - dragOffset
 

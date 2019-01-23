@@ -33,14 +33,26 @@ class App extends Component {
     return (
       <div className="app">
         <SliderContainer className="slide-group-container">
-          <Slider loop ref={this.sliderRef} perPage={3} onChangeCurrentSlide={this.handleChangeCurrentSlide}>
+          <Slider
+            loop
+            perPage={2}
+            ref={this.sliderRef}
+            currentSlide={currentSlide}
+            onChangeCurrentSlide={this.handleChangeCurrentSlide}
+          >
             {this.slides.map(i => (
               <Slide key={i}>
                 <ProductSummary index={i} />
               </Slide>
             ))}
           </Slider>
-          <Dots sliderRef={this.sliderRef} currentSlide={currentSlide} />
+          <Dots
+            perPage
+            sliderRef={this.sliderRef}
+            currentSlide={currentSlide}
+            totalSlides={this.slides.length}
+            onChangeCurrentSlide={this.handleChangeCurrentSlide}
+          />
         </SliderContainer>
       </div>
     );

@@ -7,11 +7,12 @@ class Dots extends Component {
   get slideIndeces() {
     const {
       perPage,
-      sliderRef: { current: slider }
+      sliderRef: { current: slider },
+      totalSlides
     } = this.props
 
     if (slider) {
-      return [...Array(perPage ? Math.ceil(slider.totalSlides / slider.perPage) : slider.totalSlides).keys()]
+      return [...Array(perPage ? Math.ceil(totalSlides / slider.perPage) : totalSlides).keys()]
     }
     return []
   }
@@ -20,13 +21,14 @@ class Dots extends Component {
     const {
       perPage: isPerPage,
       currentSlide,
+      totalSlides,
       sliderRef: { current: slider }
     } = this.props
 
     let actualCurrentSlide = currentSlide
     const isCurrentSlideNegativeClone = currentSlide < 0
     if (isCurrentSlideNegativeClone) {
-      actualCurrentSlide = currentSlide + slider.innerElements.length - (2 * slider.perPage)
+      actualCurrentSlide = currentSlide + totalSlides
     }
     return isPerPage ? Math.floor(actualCurrentSlide / slider.perPage) : actualCurrentSlide
   }
@@ -34,7 +36,8 @@ class Dots extends Component {
   handleDotClick = index => {
     const {
       perPage,
-      sliderRef: { current: slider }
+      sliderRef: { current: slider },
+      onChangeCurrentSlide
     } = this.props
 
     let slideToGo
@@ -43,8 +46,7 @@ class Dots extends Component {
     } else {
       slideToGo = index
     }
-
-    slider.goTo(slideToGo)
+    onChangeCurrentSlide(slideToGo)
   }
 
   render() {
@@ -57,6 +59,8 @@ class Dots extends Component {
       sliderRef: { current: slider },
       perPage,
       currentSlide,
+      onChangeCurrentSlide,
+      totalSlides,
       ...otherProps
     } = this.props
 
@@ -81,6 +85,7 @@ class Dots extends Component {
 
 Dots.propTypes = {
   perPage: PropTypes.bool,
+  onChangeCurrentSlide: PropTypes.func.isRequired,
   rootTag: PropTypes.string,
   dotTag: PropTypes.string,
   className: PropTypes.string,
