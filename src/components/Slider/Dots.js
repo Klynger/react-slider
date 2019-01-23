@@ -1,28 +1,26 @@
+import { resolveSlidesNumber } from '../../utils'
 import React, { Component } from 'react'
 import classnames from 'classnames'
 import PropTypes from 'prop-types'
-import Slider from './Slider'
 
 class Dots extends Component {
   get slideIndeces() {
     const {
-      perPage,
-      sliderRef: { current: slider },
+      showDotsPerPage,
       totalSlides
     } = this.props
 
-    if (slider) {
-      return [...Array(perPage ? Math.ceil(totalSlides / slider.perPage) : totalSlides).keys()]
+    if (this.perPage) {
+      return [...Array(showDotsPerPage ? Math.ceil(totalSlides / this.perPage) : totalSlides).keys()]
     }
     return []
   }
 
   calculateDotIndex = () => {
     const {
-      perPage: isPerPage,
+      showDotsPerPage,
       currentSlide,
       totalSlides,
-      sliderRef: { current: slider }
     } = this.props
 
     let actualCurrentSlide = currentSlide
@@ -30,19 +28,18 @@ class Dots extends Component {
     if (isCurrentSlideNegativeClone) {
       actualCurrentSlide = currentSlide + totalSlides
     }
-    return isPerPage ? Math.floor(actualCurrentSlide / slider.perPage) : actualCurrentSlide
+    return showDotsPerPage ? Math.floor(actualCurrentSlide / this.perPage) : actualCurrentSlide
   }
 
   handleDotClick = index => {
     const {
-      perPage,
-      sliderRef: { current: slider },
+      showDotsPerPage,
       onChangeCurrentSlide
     } = this.props
 
     let slideToGo
-    if (perPage) {
-      slideToGo = index * slider.perPage
+    if (showDotsPerPage) {
+      slideToGo = index * this.perPage
     } else {
       slideToGo = index
     }
@@ -56,7 +53,7 @@ class Dots extends Component {
       className,
       dotProps,
       dotClasses: dotClassesProp,
-      sliderRef: { current: slider },
+      showDotsPerPage,
       perPage,
       currentSlide,
       onChangeCurrentSlide,
@@ -64,15 +61,15 @@ class Dots extends Component {
       ...otherProps
     } = this.props
 
-    if (!slider) {
-      return null
+    if (!this.perPage) {
+      this.perPage = resolveSlidesNumber(perPage)
     }
     
     return (
       <RootTag className={classnames('slider-dots-container', className)} {...otherProps}>
         {this.slideIndeces.map(i => {
           const dotClasses = classnames('slider-dot', dotClassesProp, {
-            active: i === this.calculateDotIndex(perPage, currentSlide, slider.perPage)
+            active: i === this.calculateDotIndex()
           })
           return (
             <DotTag className={dotClasses} key={i} onClick={() => this.handleDotClick(i)} {...dotProps} />
@@ -84,21 +81,19 @@ class Dots extends Component {
 }
 
 Dots.propTypes = {
-  perPage: PropTypes.bool,
+  perPage: PropTypes.number,
+  showDotsPerPage: PropTypes.bool,
   onChangeCurrentSlide: PropTypes.func.isRequired,
   rootTag: PropTypes.string,
   dotTag: PropTypes.string,
   className: PropTypes.string,
-  sliderRef: PropTypes.shape({
-    current: PropTypes.instanceOf(Slider)
-  }).isRequired,
   dotProps: PropTypes.object
 }
 
 Dots.defaultProps = {
   rootTag: 'ul',
   dotTag: 'li',
-  perPage: false
+  showDotsPerPage: false,
 }
 
 export default Dots

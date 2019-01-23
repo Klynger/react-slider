@@ -2,8 +2,9 @@ import React, { Children, Component, cloneElement } from 'react'
 // import debounce from 'debounce'
 import PropTypes from 'prop-types'
 import transformProperty from '../../utils/transformProperty'
+import { resolveSlidesNumber } from '../../utils'
 
-export default class Slider extends Component {
+class Slider extends Component {
   static propTypes = {
     resizeDebounce: PropTypes.number,
     onChangeCurrentSlide: PropTypes.func.isRequired,
@@ -88,7 +89,7 @@ export default class Slider extends Component {
     const { draggable, currentSlide } = this.props
     this.setSelectorWidth()
     this.setInnerElements()
-    this.resolveSlidesNumber()
+    this.perPage = resolveSlidesNumber(this.props.perPage)
     this.enableTransition({
       width: `${(this.selectorWidth / this.perPage) * this.innerElements.length}px`,
       ...(draggable ? { cursor: '-webkit-grab' } : {}),
@@ -112,21 +113,6 @@ export default class Slider extends Component {
 
   setInnerElements = () => {
     this.innerElements = [].slice.call(this.sliderFrame.children)
-  }
-
-  resolveSlidesNumber = () => {
-    if (typeof this.props.perPage === 'number') {
-      this.perPage = this.props.perPage
-    } else if (typeof this.props.perPage === 'object') {
-      this.perPage = 1
-      if (window) {
-        for (const viewport in this.props.perPage) {
-          if (window.innerWidth >= viewport) {
-            this.perPage = this.props.perPage[viewport]
-          }
-        }
-      }
-    }
   }
 
   get totalSlides() {
@@ -358,7 +344,7 @@ export default class Slider extends Component {
   render() {
     const { children: childrenProp, loop } = this.props
     if (!this.perPage) {
-      this.resolveSlidesNumber()
+      this.perPage = resolveSlidesNumber(this.props.perPage)
     }
 
     const newChildren = loop ? Children.map([
@@ -380,3 +366,5 @@ export default class Slider extends Component {
     )
   }
 }
+
+export default Slider

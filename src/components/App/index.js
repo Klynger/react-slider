@@ -23,10 +23,6 @@ class App extends Component {
     this.setState({ currentSlide: i })
   }
 
-  componentDidMount() {
-    this.forceUpdate()
-  }
-
   render() {
     const { currentSlide } = this.state
 
@@ -47,8 +43,8 @@ class App extends Component {
             ))}
           </Slider>
           <Dots
-            perPage
-            sliderRef={this.sliderRef}
+            showDotsPerPage
+            perPage={2}
             currentSlide={currentSlide}
             totalSlides={this.slides.length}
             onChangeCurrentSlide={this.handleChangeCurrentSlide}
