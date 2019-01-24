@@ -49,7 +49,8 @@ class Dots extends Component {
 
   componentDidMount() {
     this.onResize = debounce(() => {
-      this.perPage = resolveSlidesNumber(this.props.perPage)
+      const { perPage } = this.props
+      this.perPage = resolveSlidesNumber(perPage)
       this.forceUpdate()
     }, 250)
     window.addEventListener('resize', this.onResize)
@@ -77,7 +78,7 @@ class Dots extends Component {
     if (!this.perPage) {
       this.perPage = resolveSlidesNumber(perPage)
     }
-    
+
     return (
       <RootTag className={classnames('slider-dots-container', className)} {...otherProps}>
         {this.slideIndeces.map(i => {

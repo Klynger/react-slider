@@ -17,7 +17,7 @@ class App extends Component {
     }
   }
   get slides() {
-    return [1, 2, 3, 4, 5]
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
   }
 
   handleChangeCurrentSlide = i => {
@@ -32,8 +32,10 @@ class App extends Component {
     const { currentSlide } = this.state
 
     const perPage = {
-      600: 1,
-      1000: 2
+      800: 1,
+      900: 2,
+      1000: 3,
+      1100: 4
     }
 
     return (

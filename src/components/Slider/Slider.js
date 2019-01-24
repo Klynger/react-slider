@@ -48,16 +48,7 @@ class Slider extends Component {
 
   componentDidMount() {
     this.init()
-
-    this.onResize = debounce(() => {
-      requestAnimationFrame(() => {
-        this.handleResize()
-        requestAnimationFrame(() => {
-          this.slideToCurrent(false, this.props.currentSlide)
-        })
-      })
-    }, this.props.resizeDebounce)
-
+    this.onResize = debounce(this.handleResize, this.props.resizeDebounce)
     window.addEventListener('resize', this.onResize)
   }
 
@@ -71,7 +62,7 @@ class Slider extends Component {
 
   getStylingTransition = (easing, duration = 0) => ({
     webkitTransition: `all ${duration}ms ${easing}`,
-      transition: `all ${duration}ms ${easing}`
+    transition: `all ${duration}ms ${easing}`
   })
 
   enableTransition = (extraStyles = {}) => {
@@ -110,13 +101,21 @@ class Slider extends Component {
   }
 
   handleResize = () => {
-    const { perPage } = this.props
+    const { perPage, currentSlide, onChangeCurrentSlide } = this.props
     this.perPage = resolveSlidesNumber(perPage)
+    const newCurrentSlide = Math.floor(currentSlide / this.perPage) * this.perPage
 
     this.selectorWidth = this.selector.getBoundingClientRect().width
     this.setStyle(this.sliderFrame, {
       width: `${(this.selectorWidth / this.perPage) * this.innerElements.length}px`
     })
+    
+    if (currentSlide !== newCurrentSlide) {
+      onChangeCurrentSlide(newCurrentSlide)
+    }
+
+    this.slideToCurrent(false, newCurrentSlide)
+    this.forceUpdate()
   }
 
   setSelectorWidth = () => {
@@ -128,7 +127,7 @@ class Slider extends Component {
   }
 
   get totalSlides() {
-    return this.innerElements && this.perPage ?  this.innerElements.length - 2 * this.perPage : 0
+    return this.innerElements && this.perPage ? this.innerElements.length - 2 * this.perPage : 0
   }
 
   prev = (howManySlides = 1) => {
@@ -165,7 +164,7 @@ class Slider extends Component {
     } else {
       newCurrentSlide = Math.max(currentSlide - howManySlides, 0)
     }
-    
+
     if (newCurrentSlide !== currentSlide) {
       this.slideToCurrent(loop, newCurrentSlide)
       requestAnimationFrame(() => {
@@ -174,7 +173,7 @@ class Slider extends Component {
     }
   }
 
-  next = (howManySlides = this.props.howManySlides) => {
+  next = (howManySlides = 1) => {
     if (this.totalSlides <= this.perPage) {
       return
     }
@@ -262,7 +261,7 @@ class Slider extends Component {
     const movement = this.drag.endX - this.drag.startX
     const movementDistance = Math.abs(movement)
     const howManySliderToSlide = Math.ceil(movementDistance / (this.selectorWidth / this.perPage))
-    
+
     const slideToNegativeClone = movement > 0 && currentSlide - howManySliderToSlide < 0
     const slideToPositiveClone = movement < 0 && currentSlide + howManySliderToSlide > this.innerElements.length - this.perPage
 
@@ -319,7 +318,7 @@ class Slider extends Component {
 
       this.drag.endX = e.pageX
 
-      const computedCurrentSlide = loop ? currentSlide +  this.perPage : currentSlide
+      const computedCurrentSlide = loop ? currentSlide + this.perPage : currentSlide
       const currentOffset = computedCurrentSlide * (this.selectorWidth / this.perPage)
       const dragOffset = (this.drag.endX - this.drag.startX)
       const offset = currentOffset - dragOffset
