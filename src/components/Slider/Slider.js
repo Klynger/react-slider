@@ -13,13 +13,12 @@ class Slider extends Component {
     perPage: PropTypes.number,
     draggable: PropTypes.bool,
     threshold: PropTypes.number,
+    howManySlides: PropTypes.number,
     loop: PropTypes.bool,
     children: PropTypes.oneOfType([
       PropTypes.element,
       PropTypes.arrayOf(PropTypes.element)
-    ]),
-    onInit: PropTypes.func,
-    onChange: PropTypes.func,
+    ])
   }
 
   static defaultProps = {
@@ -28,11 +27,10 @@ class Slider extends Component {
     easing: 'ease-out',
     perPage: 1,
     currentSlide: 0,
+    howManySlides: 1,
     draggable: true,
     threshold: 20,
-    loop: false,
-    onInit: () => { },
-    onChange: () => { }
+    loop: false
   }
 
   static events = ['onMouseUp', 'onMouseDown', 'onMouseLeave', 'onMouseMove']
@@ -119,7 +117,7 @@ class Slider extends Component {
     return this.innerElements && this.perPage ?  this.innerElements.length - 2 * this.perPage : 0
   }
 
-  prev = (howManySlides = 1) => {
+  prev = (howManySlides = this.props.howManySlides) => {
     if (this.totalSlides <= this.perPage) {
       return
     }
@@ -162,7 +160,7 @@ class Slider extends Component {
     }
   }
 
-  next = (howManySlides = 1) => {
+  next = (howManySlides = this.props.howManySlides) => {
     if (this.totalSlides <= this.perPage) {
       return
     }

@@ -3,6 +3,7 @@ import Slider from '../Slider/Slider'
 import Slide from '../Slider/Slide'
 import SliderContainer from '../Slider/SliderContainer'
 import Dots from '../Slider/Dots'
+import Arrow from '../Slider/Arrow'
 import ProductSummary from '../ProductSummary'
 import './App.css'
 
@@ -23,6 +24,10 @@ class App extends Component {
     this.setState({ currentSlide: i })
   }
 
+  componentDidMount() {
+    this.forceUpdate()
+  }
+
   render() {
     const { currentSlide } = this.state
 
@@ -32,6 +37,7 @@ class App extends Component {
           <Slider
             loop
             perPage={2}
+            howManySlides={2}
             ref={this.sliderRef}
             currentSlide={currentSlide}
             onChangeCurrentSlide={this.handleChangeCurrentSlide}
@@ -42,6 +48,8 @@ class App extends Component {
               </Slide>
             ))}
           </Slider>
+          <Arrow onClick={this.sliderRef.current ? this.sliderRef.current.prev : () => {}} />
+          <Arrow right onClick={this.sliderRef.current ? this.sliderRef.current.next : () => {}} />
           <Dots
             showDotsPerPage
             perPage={2}
