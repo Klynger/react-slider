@@ -10,7 +10,7 @@ class Slider extends Component {
     onChangeCurrentSlide: PropTypes.func.isRequired,
     duration: PropTypes.number,
     easing: PropTypes.string,
-    perPage: PropTypes.number,
+    perPage: PropTypes.oneOfType([PropTypes.number, PropTypes.object]),
     draggable: PropTypes.bool,
     threshold: PropTypes.number,
     howManySlides: PropTypes.number,
@@ -50,8 +50,12 @@ class Slider extends Component {
     this.init()
 
     this.onResize = debounce(() => {
-      this.handleResize()
-      this.slideToCurrent(false, this.props.currentSlide)
+      requestAnimationFrame(() => {
+        this.handleResize()
+        requestAnimationFrame(() => {
+          this.slideToCurrent(false, this.props.currentSlide)
+        })
+      })
     }, this.props.resizeDebounce)
 
     window.addEventListener('resize', this.onResize)
@@ -127,7 +131,7 @@ class Slider extends Component {
     return this.innerElements && this.perPage ?  this.innerElements.length - 2 * this.perPage : 0
   }
 
-  prev = (howManySlides = this.props.howManySlides) => {
+  prev = (howManySlides = 1) => {
     if (this.totalSlides <= this.perPage) {
       return
     }
@@ -212,6 +216,14 @@ class Slider extends Component {
         onChangeCurrentSlide(newCurrentSlide)
       })
     }
+  }
+
+  prevPage = () => {
+    this.prev(this.perPage)
+  }
+
+  nextPage = () => {
+    this.next(this.perPage)
   }
 
   goTo = index => {

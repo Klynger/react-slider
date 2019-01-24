@@ -31,13 +31,17 @@ class App extends Component {
   render() {
     const { currentSlide } = this.state
 
+    const perPage = {
+      600: 1,
+      1000: 2
+    }
+
     return (
       <div className="app">
         <SliderContainer className="slide-group-container">
           <Slider
             loop
-            perPage={2}
-            howManySlides={2}
+            perPage={perPage}
             ref={this.sliderRef}
             currentSlide={currentSlide}
             onChangeCurrentSlide={this.handleChangeCurrentSlide}
@@ -48,11 +52,11 @@ class App extends Component {
               </Slide>
             ))}
           </Slider>
-          <Arrow onClick={this.sliderRef.current ? this.sliderRef.current.prev : () => {}} />
-          <Arrow right onClick={this.sliderRef.current ? this.sliderRef.current.next : () => {}} />
+          <Arrow onClick={this.sliderRef.current ? this.sliderRef.current.prevPage : () => {}} />
+          <Arrow right onClick={this.sliderRef.current ? this.sliderRef.current.nextPage : () => {}} />
           <Dots
             showDotsPerPage
-            perPage={2}
+            perPage={perPage}
             currentSlide={currentSlide}
             totalSlides={this.slides.length}
             onChangeCurrentSlide={this.handleChangeCurrentSlide}

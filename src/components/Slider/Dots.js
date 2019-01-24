@@ -2,6 +2,7 @@ import { resolveSlidesNumber } from '../../utils'
 import React, { Component } from 'react'
 import classnames from 'classnames'
 import PropTypes from 'prop-types'
+import debounce from 'debounce'
 
 class Dots extends Component {
   get slideIndeces() {
@@ -46,6 +47,18 @@ class Dots extends Component {
     onChangeCurrentSlide(slideToGo)
   }
 
+  componentDidMount() {
+    this.onResize = debounce(() => {
+      this.perPage = resolveSlidesNumber(this.props.perPage)
+      this.forceUpdate()
+    }, 250)
+    window.addEventListener('resize', this.onResize)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.onResize)
+  }
+
   render() {
     const {
       rootTag: RootTag,
@@ -81,7 +94,7 @@ class Dots extends Component {
 }
 
 Dots.propTypes = {
-  perPage: PropTypes.number,
+  perPage: PropTypes.oneOfType([PropTypes.number, PropTypes.object]),
   showDotsPerPage: PropTypes.bool,
   onChangeCurrentSlide: PropTypes.func.isRequired,
   rootTag: PropTypes.string,
