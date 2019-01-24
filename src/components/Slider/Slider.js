@@ -1,5 +1,5 @@
 import React, { Children, Component, cloneElement } from 'react'
-// import debounce from 'debounce'
+import debounce from 'debounce'
 import PropTypes from 'prop-types'
 import transformProperty from '../../utils/transformProperty'
 import { resolveSlidesNumber } from '../../utils'
@@ -49,12 +49,16 @@ class Slider extends Component {
   componentDidMount() {
     this.init()
 
-    // this.onResize = debounce(() => {
-    //   this.resize()
-    //   this.slideToCurrent()
-    // }, this.props.resizeDebounce)
+    this.onResize = debounce(() => {
+      this.handleResize()
+      this.slideToCurrent(false, this.props.currentSlide)
+    }, this.props.resizeDebounce)
 
-    // window.addEventListener('resize', this.onResize)
+    window.addEventListener('resize', this.onResize)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.onResize)
   }
 
   componentDidUpdate() {
@@ -101,9 +105,15 @@ class Slider extends Component {
     this.slideToCurrent(false, currentSlide)
   }
 
-  // componentWillUnmount() {
-    // window.removeEventListener('resize', this.onResize)
-  // }
+  handleResize = () => {
+    const { perPage } = this.props
+    this.perPage = resolveSlidesNumber(perPage)
+
+    this.selectorWidth = this.selector.getBoundingClientRect().width
+    this.setStyle(this.sliderFrame, {
+      width: `${(this.selectorWidth / this.perPage) * this.innerElements.length}px`
+    })
+  }
 
   setSelectorWidth = () => {
     this.selectorWidth = this.selector.getBoundingClientRect().width
@@ -251,22 +261,6 @@ class Slider extends Component {
     }
     this.slideToCurrent(slideToNegativeClone || slideToPositiveClone)
   }
-
-  // TODO make it work
-  // resize = () => {
-  //   this.resolveSlidesNumber(this.innerElements.length)
-
-  //   this.selectorWidth = this.selector.getBoundingClientRect().width
-  //   this.setStyle(this.sliderFrame, {
-  //     width: (this.selectorWidth / this.perPage) * this.innerElements.length
-  //   })
-
-  //   this.innerElements.forEach(el => {
-  //     this.setStyle(el, {
-  //       width: `${100 / this.innerElements.length}%`
-  //     })
-  //   })
-  // }
 
   clearDrag = () => {
     this.drag = {
