@@ -42,6 +42,7 @@ class App extends Component {
       <div className="app">
         <SliderContainer className="slide-group-container">
           <Slider
+            loop
             perPage={perPage}
             ref={this.sliderRef}
             currentSlide={currentSlide}
