@@ -83,7 +83,7 @@ class Slider extends Component {
   }
 
   init = () => {
-    const { draggable, currentSlide } = this.props
+    const { draggable, currentSlide, loop } = this.props
     this.setSelectorWidth()
     this.setInnerElements()
     this.perPage = resolveSlidesNumber(this.props.perPage)
@@ -97,7 +97,8 @@ class Slider extends Component {
         width: `${100 / this.innerElements.length}%`
       })
     })
-    this.slideToCurrent(false, currentSlide)
+    let newCurrentSlide = loop ? currentSlide % this.totalSlides : Math.min(Math.max(currentSlide, 0), this.totalSlides - this.perPage)
+    this.slideToCurrent(false, newCurrentSlide)
   }
 
   handleResize = () => {
@@ -278,7 +279,6 @@ class Slider extends Component {
     } else if (movement < 0 && movementDistance > threshold && this.innerElements.length > this.perPage) {
       newCurrentSlide = this.next(howManySliderToSlide)
     }
-
     this.slideToCurrent(slideToNegativeClone || slideToPositiveClone, newCurrentSlide)
   }
 
