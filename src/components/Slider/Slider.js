@@ -127,7 +127,10 @@ class Slider extends Component {
   }
 
   get totalSlides() {
-    return this.innerElements && this.perPage ? this.innerElements.length - 2 * this.perPage : 0
+    if (this.innerElements && this.perPage) {
+      return this.props.loop ? this.innerElements.length - 2 * this.perPage : this.innerElements.length
+    }
+    return 0
   }
 
   prev = (howManySlides = 1) => {
@@ -171,6 +174,8 @@ class Slider extends Component {
         onChangeCurrentSlide(newCurrentSlide)
       })
     }
+
+    return newCurrentSlide
   }
 
   next = (howManySlides = 1) => {
@@ -215,6 +220,8 @@ class Slider extends Component {
         onChangeCurrentSlide(newCurrentSlide)
       })
     }
+
+    return newCurrentSlide
   }
 
   prevPage = () => {
@@ -265,12 +272,14 @@ class Slider extends Component {
     const slideToNegativeClone = movement > 0 && currentSlide - howManySliderToSlide < 0
     const slideToPositiveClone = movement < 0 && currentSlide + howManySliderToSlide > this.innerElements.length - this.perPage
 
+    let newCurrentSlide = currentSlide
     if (movement > 0 && movementDistance > threshold && this.innerElements.length > this.perPage) {
-      this.prev(howManySliderToSlide)
+      newCurrentSlide = this.prev(howManySliderToSlide)
     } else if (movement < 0 && movementDistance > threshold && this.innerElements.length > this.perPage) {
-      this.next(howManySliderToSlide)
+      newCurrentSlide = this.next(howManySliderToSlide)
     }
-    this.slideToCurrent(slideToNegativeClone || slideToPositiveClone)
+
+    this.slideToCurrent(slideToNegativeClone || slideToPositiveClone, newCurrentSlide)
   }
 
   clearDrag = () => {
