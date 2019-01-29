@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import Slider from '../Slider/Slider'
 import Slide from '../Slider/Slide'
 import SliderContainer from '../Slider/SliderContainer'
@@ -11,17 +11,44 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.sliderRef = React.createRef()
+    this.imgSliderRef = React.createRef()
 
     this.state = {
-      currentSlide: 0
+      currentSlide: 0,
+      currentSlideImg: 0
     }
-  }
-  get slides() {
-    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+
+    this.slidesNumber = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    this.slidesImg = [
+      {
+        src: 'images/img1.jpg',
+        alt: 'Image 1'
+      },
+      {
+        src: 'images/img2.jpg',
+        alt: 'Image 2'
+      },
+      {
+        src: 'images/img3.jpg',
+        alt: 'Image 3'
+      },
+      {
+        src: 'images/img4.jpeg',
+        alt: 'Image 4'
+      },
+      {
+        src: 'images/img5.jpg',
+        alt: 'Image 5'
+      }
+    ]
   }
 
   handleChangeCurrentSlide = i => {
     this.setState({ currentSlide: i })
+  }
+
+  handeChangeCurrentSlideImg = i => {
+    this.setState({ currentSlideImg: i })
   }
 
   componentDidMount() {
@@ -29,7 +56,7 @@ class App extends Component {
   }
 
   render() {
-    const { currentSlide } = this.state
+    const { currentSlide, currentSlideImg } = this.state
 
     const perPage = {
       800: 1,
@@ -48,21 +75,40 @@ class App extends Component {
             currentSlide={currentSlide}
             onChangeCurrentSlide={this.handleChangeCurrentSlide}
           >
-            {this.slides.map(i => (
-              <Slide key={i}>
-                <ProductSummary index={i} />
-              </Slide>
-            ))}
+            {this.slidesNumber.map(i => {
+              return (
+                <Slide key={i} className="slide-summary">
+                  <ProductSummary index={i} />
+                </Slide>
+              )
+            })}
           </Slider>
-          <Arrow onClick={this.sliderRef.current ? this.sliderRef.current.prevPage : () => {}} />
-          <Arrow right onClick={this.sliderRef.current ? this.sliderRef.current.nextPage : () => {}} />
+          {this.sliderRef.current && (
+            <Fragment>
+              <Arrow onClick={this.sliderRef.current.prevPage} />
+              <Arrow right onClick={this.sliderRef.current.nextPage} />
+            </Fragment>
+          )}
           <Dots
             showDotsPerPage
             perPage={perPage}
             currentSlide={currentSlide}
-            totalSlides={this.slides.length}
+            totalSlides={this.slidesNumber.length}
             onChangeCurrentSlide={this.handleChangeCurrentSlide}
           />
+        </SliderContainer>
+        <SliderContainer className="slide-group-container slider-container-img">
+          <Slider
+            ref={this.imgSliderRef}
+            currentSlide={currentSlideImg}
+            onChangeCurrentSlide={this.handeChangeCurrentSlideImg}
+          >
+            {this.slidesImg.map(({ src, alt }) => (
+              <Slide key={alt}>
+                <img src={src} alt={alt} />
+              </Slide>
+            ))}
+          </Slider>
         </SliderContainer>
       </div>
     );
